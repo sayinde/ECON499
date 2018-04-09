@@ -427,7 +427,7 @@ avg_edgg + theme(axis.text=element_text(size=12),
 
 #### AVG ED for Round 3 ## 
 
-occupation_only <- OccupationfilterR3 %>%
+occupation_only1 <- OccupationfilterR3 %>%
   group_by(occupation) %>% 
   summarise(
     avg_edu = mean(edu_attainment, na.rm = T),
@@ -441,7 +441,7 @@ occupation_only <- OccupationfilterR3 %>%
   )
 
 # Error bars represent standard error of the mean
-avg_edgg <- ggplot(occupation_only, aes(x=type, y=avg_edu, fill=as.factor(type))) + 
+avg_edgg1 <- ggplot(occupation_only1, aes(x=type, y=avg_edu, fill=as.factor(type))) + 
   geom_bar(position=position_dodge(), stat="identity") +
   geom_errorbar(aes(ymin=avg_edu-sd_edu/sqrt(count), ymax=avg_edu+sd_edu/sqrt(count)),
                 width=.2,                    # Width of the error bars
@@ -450,7 +450,7 @@ avg_edgg <- ggplot(occupation_only, aes(x=type, y=avg_edu, fill=as.factor(type))
   labs(x = "", y="Average Education", fill= "") + 
   guides(fill=FALSE) 
 
-avg_edgg + theme(axis.text=element_text(size=12),
+avg_edgg1 + theme(axis.text=element_text(size=12),
                  axis.title=element_text(face="bold"))
 
 
@@ -483,7 +483,7 @@ avg_agegg <- ggplot(Occup_gen_age, aes(x=type, y=avg_age, fill=as.factor(gender)
   geom_errorbar(aes(ymin=avg_age-sd_age/sqrt(count), ymax=avg_age+sd_age/sqrt(count)),
                 width=.2,                    # Width of the error bars
                 position=position_dodge(.9))+
-  labs(title = "Average Age by Employment Type - Round 6 (2015)")+
+  labs(title = "Average Age by Employment Type - Round 5 (2012)")+
   labs(x = "", y="Average Age", fill= "") + 
   guides(fill=FALSE)
 
@@ -522,9 +522,6 @@ avg_agegg + theme(axis.text=element_text(size=12),
 
 ############## ------------- GRAPH 4: Food Insecurity---------------- #####################
 
-
-
-
 Food_insecure6r  <- OccupationfilterR6 %>%
   group_by(occupation, length_withoutfood) %>%
   summarise (n = n()) %>%
@@ -539,15 +536,52 @@ Fsecurity_ggplotr6 <- ggplot(Food_insecure6r, aes(x=length_withoutfood,
 )) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity") +
-  labs(title = "Food Insecurity by Employment Type - Round 6 (2015)")+
+  labs(title = "Food Insecurity by Employment Type - Round 5 (2012)")+
   labs(x = "Frequency without Food (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 colors <- colorRampPalette(brewer.pal(5, "Accent"))
 
+################# experimental welfare index ###
+
+Food_insecure6r$welfareINDX <- Food_insecure6r$length_withoutfood
+
+Food_insecure6r <- Food_insecure6r %>%
+  mutate( 
+    welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+    welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+          welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+          welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+          welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+          )
+## ^^ this works! ##
+
+
+
+Food_insecureUPDATE <- read.csv("https://github.com/sayinde/ECON499/blob/master/Food_insecureUPDATE.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+
+
+Food_insecure6rA  <- Food_insecure6r %>%
+  group_by(occupation, welfareINDX) %>%
+  summarise (n = n()) %>%
+  mutate(freq = (n / sum(n)) * 100 ) %>%
+  mutate(type = ifelse(occupation == 0, "Informal", NA),
+         type = ifelse(occupation == 1, "Formal", type)
+  )
+
+Fsecurity_ggplotr6A <- ggplot(Food_insecureUPDATE, aes(x=welfareINDX,
+                                                  y=freq1,
+                                                  fill=as.factor(type)
+)) + 
+  geom_histogram(position=position_dodge(),
+                 stat = "identity") +
+  labs(title = "Food Insecurity by Employment Type - Round 5 (2012)")+
+  labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+  scale_fill_manual(values=c("#79c36a", "#599ad3"))
+
 
 Fsecurity_ggplotr6 + theme(axis.text=element_text(size=12),
-                         axis.title=element_text(face="bold")) + scale_fill_manual(values = colors(6))
+                         axis.title=element_text(face="bold")) + scale_fill_manual(values = colors(6)) + ylim(0,70)
 
 
 ############## - 2007 --- ##
@@ -572,7 +606,7 @@ Fsecurity_ggplotr3 <- ggplot(Food_insecure3r, aes(x=length_withoutfood,
 
 
 Fsecurity_ggplotr3 + theme(axis.text=element_text(size=12),
-                         axis.title=element_text(face="bold")) + scale_fill_manual(values = colors(6))
+                         axis.title=element_text(face="bold")) + scale_fill_manual(values = colors(6)) + ylim(0,70)
 
 
 
@@ -590,7 +624,7 @@ cash_volatiler6 <- OccupationfilterR6 %>%
 Cvolatileggplotr6 <- ggplot(cash_volatiler6, aes(x=length_withoutcash, y=freq, fill=as.factor(type))) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Cash Volitality by Employment Type - Round 3 (2015)")+
+  labs(title = "Cash Volitality by Employment Type - Round 5 (2015)")+
   labs(x = "Frequency without Cash (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
@@ -599,7 +633,7 @@ colors1 <- colorRampPalette(brewer.pal(5, "Set2"))
 
 Cvolatileggplotr6 + theme(axis.text=element_text(size=12),
                         axis.title=element_text(face="bold")) +
-  xlim(-.5,4.5) + scale_fill_manual(values = colors1(6))
+  xlim(-.5,4.5) + scale_fill_manual(values = colors1(6)) +ylim(0,40)
 
 
 ############## ----------- Round 3 2007 --
@@ -622,12 +656,12 @@ Cvolatileggplotr3 <- ggplot(cash_volatiler3, aes(x=length_withoutcash, y=freq, f
 
 Cvolatileggplotr3 + theme(axis.text=element_text(size=12),
                         axis.title=element_text(face="bold")) +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors1(6))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors1(6))+ylim(0,40)
 
 
 ############## ------------- GRAPH 5: Medicine inconsistency --------------- #####################
 
-medsr6 <- OccupationfilterR3 %>%
+medsr6 <- OccupationfilterR6 %>%
   group_by(occupation, length_withoutmeds) %>%
   summarise (n = n()) %>%
   mutate(freq = (n / sum(n)) * 100 ) %>%
@@ -639,13 +673,13 @@ medsggplotr6 <- ggplot(medsr6, aes(x=length_withoutmeds, y=freq, fill=as.factor(
 ) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Inconsistency of Medicine by Employment Type - Round 6 (2015)")+
+  labs(title = "Inconsistency of Medicine by Employment Type - Round 5 (2012)")+
   labs(x = "Frequency without Medicine (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 medsggplotr6 + theme(axis.text=element_text(size=12),
                    axis.title=element_text(face="bold")) +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors2(6))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors2(6)) +ylim(0,70)
 
 
 colors2 <- colorRampPalette(brewer.pal(5, "Set3"))
@@ -671,7 +705,7 @@ medsggplotr3 <- ggplot(medsr3, aes(x=length_withoutmeds, y=freq, fill=as.factor(
 
 medsggplotr3 + theme(axis.text=element_text(size=12),
                    axis.title=element_text(face="bold")) +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors2(6))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors2(6))+ylim(0,70)
 
 ############## ------------- GRAPH 6: Fuel Inconsistency --------------- #####################
 
@@ -686,12 +720,12 @@ fuelr6 <- OccupationfilterR6 %>%
 fuelggplotr6 <- ggplot(fuelr6, aes(x=length_withoutfuel, y=freq, fill=as.factor(type))) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Inconsistency of Cooking Fuel by Employment Type")+
+  labs(title = "Inconsistency of Cooking Fuel by Employment Type - Round 5 (2012)")+
   labs(x = "Frequency without Cooking Fuel (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 fuelggplotr6 +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(2))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(2))+ylim(0,80)
 
 
 colors3 <- colorRampPalette(brewer.pal(5, "Accent"))
@@ -709,16 +743,16 @@ fuelr3 <- OccupationfilterR3 %>%
 fuelggplotr3 <- ggplot(fuelr3, aes(x=length_withoutfuel, y=freq, fill=as.factor(type))) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Inconsistency of Cooking Fuel by Employment Type")+
+  labs(title = "Inconsistency of Cooking Fuel by Employment Type - Round 3 (2007)")+
   labs(x = "Frequency without Cooking Fuel (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 fuelggplotr3 +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(2))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(2)) + ylim(0,80)
 
 ############## ------------- GRAPH 7: Clean Water Consistency --------------- #####################
 
-h20r6 <- OccupationfilterR3 %>%
+h20r6 <- OccupationfilterR6 %>%
   group_by(occupation, length_withoutcleanh20) %>%
   summarise (n = n()) %>%
   mutate(freq = (n / sum(n)) * 100 ) %>%
@@ -726,16 +760,16 @@ h20r6 <- OccupationfilterR3 %>%
          type = ifelse(occupation == 1, "Formal", type)
   )
 
-h20ggplotr6 <- ggplot(h20r3, aes(x=length_withoutcleanh20, y=freq, fill=as.factor(type))) + 
+h20ggplotr6 <- ggplot(h20r6, aes(x=length_withoutcleanh20, y=freq, fill=as.factor(type))) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Inconsistency of Clean Water by Employment Type")+
+  labs(title = "Inconsistency of Clean Water by Employment Type - Round 5 (2012)")+
   labs(x = "Frequency without Clean Water (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 
 h20ggplotr6 +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(8))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(8))+ylim(0,65)
 
 
 colors3 <- colorRampPalette(brewer.pal(5, "Paired"))
@@ -753,13 +787,13 @@ h20r3 <- OccupationfilterR3 %>%
 h20ggplotr3 <- ggplot(h20r3, aes(x=length_withoutcleanh20, y=freq, fill=as.factor(type))) + 
   geom_histogram(position=position_dodge(),
                  stat = "identity")+
-  labs(title = "Inconsistency of Clean Water by Employment Type")+
+  labs(title = "Inconsistency of Clean Water by Employment Type - Round 3 (2007)")+
   labs(x = "Frequency without Clean Water (annual)", y="Percentage of sector", fill= "Employment Types") +
   scale_fill_manual(values=c("#79c36a", "#599ad3"))
 
 
 h20ggplotr3 +
-  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(8))
+  xlim(-.5,4.5)+ scale_fill_manual(values = colors3(8)) + ylim(0,65)
 
 ######## ------------- ##
 
@@ -917,16 +951,16 @@ regression1 <- logitmfx(occupation ~ gender,
 
 ## regression 2: Age(s) as independent vaiables, and occupation as a dependent variable
 
-regression2 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5,
+regression2 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4,
                         data = OccupationfilterR6)
 
 ## regression 3: Education levels as independent variables, and occupation as a dependent variable
 
-regression3 <-logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5+ Educ1 + Educ2 + Educ3 + Educ4,
+regression3 <-logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Educ1 + Educ2 + Educ3 + Educ4,
                        data = OccupationfilterR6)
 
 ## regression 4: Urban/rural location as an independent variable, and occupation as a dependent variable
-regression4 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5 + Educ1 + Educ2 + Educ3 + Educ4 + URBRUR,
+regression4 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Educ1 + Educ2 + Educ3 + Educ4 + URBRUR,
                         data = OccupationfilterR6)
 
 
@@ -941,27 +975,26 @@ r3egression1 <- logitmfx(occupation ~ gender,
 
 ## regression 2: Age(s) as independent vables, and occupation as a dependent variable
 
-r3egression2 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5,
+r3egression2 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4,
                         data = OccupationfilterR3)
 
 ## regression 3: Education levels as independent variables, and occupation as a dependent variable
 
-r3egression3 <-logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5+ Educ1 + Educ2 + Educ3 + Educ4,
+r3egression3 <-logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Educ1 + Educ2 + Educ3 + Educ4,
                        data = OccupationfilterR3)
 
 ## regression 4: Urban/rural location as an independent variable, and occupation as a dependent variable
-r3egression4 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Age5 + Educ1 + Educ2 + Educ3 + Educ4 + URBRUR,
+r3egression4 <- logitmfx(occupation ~ gender + Age1 + Age2 + Age3 + Age4 + Educ1 + Educ2 + Educ3 + Educ4 + URBRUR,
                         data = OccupationfilterR3)
 
 
 ########-------------------------------------------------#########
 
-
+## round 5
 texreg(regression1)
 texreg(regression2)
 texreg(regression3)
 texreg(regression4)
-
 
 
 ### Round 3#### 
@@ -970,3 +1003,211 @@ texreg(r3egression1)
 texreg(r3egression2)
 texreg(r3egression3)
 texreg(r3egression4)
+
+
+
+
+
+## standard regression with WELFARE INDEX ### 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####################  Graphs with Constructed Welfare Index ##########################
+######################################################################################
+
+
+
+
+Food_insecure6r$welfareINDX <- Food_insecure6r$length_withoutfood
+
+Food_insecure6r <- Food_insecure6r %>%
+  mutate( 
+    welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+    welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+    welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+    welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+    welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+  )
+## ^^ this works! ##
+
+
+
+Food_insecureUPDATE <- read.csv("https://github.com/sayinde/ECON499/blob/master/Food_insecureUPDATE.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+
+
+Food_insecure6rA  <- Food_insecure6r %>%
+  group_by(occupation, welfareINDX) %>%
+  summarise (n = n()) %>%
+  mutate(freq = (n / sum(n)) * 100 ) %>%
+  mutate(type = ifelse(occupation == 0, "Informal", NA),
+         type = ifelse(occupation == 1, "Formal", type)
+  )
+
+ ggplot(Food_insecureUPDATE, aes(x=welfareINDX,
+                                                       y=freq1,
+                                                       fill=as.factor(type)
+)) + 
+  geom_histogram(position=position_dodge(),
+                 stat = "identity") +
+  labs(title = "Food Insecurity by Employment Type - Round 5 (2012)")+
+  labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+  scale_fill_manual(values=c("#79c36a", "#599ad3"))
+
+
+############# cash volatility #######
+ 
+ cashvolatile_UPDATE <- read.csv("https://github.com/sayinde/ECON499/blob/master/CashvolatilityUPDATE.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+
+ 
+ cash_volatiler6$welfareINDX <- cash_volatiler6$length_withoutfood
+ 
+ cash_volatiler6 <- cash_volatiler6 %>%
+   mutate( 
+     welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+   )
+
+ ## ## ##
+
+ 
+CASHgg <- ggplot(cashvolatile_UPDATE, aes(x=welfareINDX, y=freq1, fill=as.factor(type))) + 
+   geom_histogram(position=position_dodge(),
+                  stat = "identity")+
+   labs(title = "Cash Volitality by Employment Type - Round 5 (2012)")+
+   labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+   scale_fill_manual(values=c("#79c36a", "#599ad3"))
+ 
+ colors1 <- colorRampPalette(brewer.pal(5, "Set2"))
+ 
+ 
+ CASHgg + theme(axis.text=element_text(size=12),
+                           axis.title=element_text(face="bold")) + scale_fill_manual(values = colors1(6))
+ 
+ 
+ 
+ 
+ ## clean water ###
+ 
+ 
+
+Clean1 <- read.csv("https://github.com/sayinde/ECON499/blob/master/h20CLEANupdate.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+ 
+ 
+ 
+ h20r6$welfareINDX <- h20r6$length_withoutcleanh20
+ 
+ h20r6 <- h20r6 %>%
+   mutate( 
+     welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+   )
+ 
+ ## ## ##
+ 
+
+ 
+ h20ggplotr6 <- ggplot(Clean1, aes(x=welfareINDX, y=freq1, fill=as.factor(type))) + 
+   geom_histogram(position=position_dodge(),
+                  stat = "identity")+
+   labs(title = "Inconsistency of Clean Water by Employment Type - Round 5 (2012)")+
+   labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+   scale_fill_manual(values=c("#79c36a", "#599ad3"))
+ 
+ 
+ h20ggplotr6 + scale_fill_manual(values = colors3(8))
+ 
+ 
+ colors3 <- colorRampPalette(brewer.pal(5, "Paired"))
+
+ 
+ ########## cooking fuel #############
+ 
+ Fuelr6w <- read.csv("https://github.com/sayinde/ECON499/blob/master/FUELupdate.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+ 
+ 
+ fuelr6$welfareINDX <- fuelr6$length_withoutfuel
+ 
+ fuelr6 <- fuelr6 %>%
+   mutate( 
+     welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+   )
+ 
+ 
+ 
+ fuelggplotr6w <- ggplot(Fuelr6w, aes(x=welfareINDX, y=freq1, fill=as.factor(type))) + 
+   geom_histogram(position=position_dodge(),
+                  stat = "identity")+
+   labs(title = "Inconsistency of Cooking Fuel by Employment Type - Round 5 (2012)")+
+   labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+   scale_fill_manual(values=c("#79c36a", "#599ad3")) + xlim(-.5,1.5)
+ 
+ fuelggplotr6w + scale_fill_manual(values = colors3(2))
+ 
+ 
+ colors3 <- colorRampPalette(brewer.pal(5, "Accent"))
+ 
+ 
+ ######### medicine inconsistency #########
+ 
+
+ 
+ Medsr6q<- read.csv("https://github.com/sayinde/ECON499/blob/master/medUPDATE.csv?raw=true",header = TRUE,stringsAsFactors = FALSE)
+ 
+ 
+ medsr6$welfareINDX <- medsr6$length_withoutmeds
+ 
+ medsr6 <- medsr6 %>%
+   mutate( 
+     welfareINDX =  ifelse(welfareINDX == 0, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 1, 0, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 2, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 3, 1, welfareINDX),
+     welfareINDX =  ifelse(welfareINDX == 4, 1, welfareINDX)
+   )
+ 
+ 
+ 
+ medsggplotr6ww <- ggplot(Medsr6q, aes(x=welfareINDX, y=freq1, fill=as.factor(type))
+ ) + 
+   geom_histogram(position=position_dodge(),
+                  stat = "identity")+
+   labs(title = "Inconsistency of Medicine by Employment Type - Round 5 (2012)")+
+   labs(x = "Welfare Index Measure", y="Percentage of sector", fill= "Employment Types") +
+   scale_fill_manual(values=c("#79c36a", "#599ad3"))
+ 
+ medsggplotr6ww + theme(axis.text=element_text(size=12),
+                      axis.title=element_text(face="bold")) +
+ scale_fill_manual(values = colors2(6))
+ 
+ colors2 <- colorRampPalette(brewer.pal(5, "Set3"))
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
