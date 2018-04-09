@@ -1206,6 +1206,74 @@ Clean1 <- read.csv("https://github.com/sayinde/ECON499/blob/master/h20CLEANupdat
  
  
  
+ ##############################################################################################
+ ###                                                                                      #####
+ ##                                                                                         ###
+ ##                                                                                         ###
+ ########---------------------------  REGRESSION TIME----------------------------------########
+ ##############################################################################################
+ 
+
+length_withoutcash
+length_withoutcleanh20
+length_withoutfood
+length_withoutfuel
+length_withoutmeds
+ 
+ ### regression 1: Gender as an independent variable, and "forms of welfare" as a dependent variable
+ 
+ 
+ Aregression1 <- lm(length_withoutfood ~ gender,
+                         data = OccupationfilterR6)
+ summary(Aregression1)
+ 
+ 
+ ## regression 2: Age(s) as independent vaiables, and "forms of welfare" as a dependent variable
+ 
+ Bregression2 <- lm(length_withoutfood ~ gender + occupation,
+                         data = OccupationfilterR6)
+ summary(Bregression2)
+ 
+ ## regression 3: Education levels as independent variables, and "forms of welfare" as a dependent variable
+ 
+ Cregression3 <-lm(length_withoutfood ~ gender + occupation + AGE + edu_attainment,
+                        data = OccupationfilterR6)
+ 
+ ## regression 4: Urban/rural location as an independent variable, and "forms of welfare" as a dependent variable
+ Dregression4 <- lm(length_withoutfood ~ gender + occupation + AGE + edu_attainment + URBRUR,
+                         data = OccupationfilterR6)
+ 
+ 
+ 
+ 
+ 
+ #### straight regressions
+ ##### cash consistency #####
+ 
+ 
+ 
+ Aregression12 <- lm(length_withoutcash ~ gender,
+                    data = OccupationfilterR6)
+ summary(Aregression12)
+ 
+ 
+ ## regression 2: Age(s) as independent vaiables, and "forms of welfare" as a dependent variable
+ 
+ Bregression22 <- lm(length_withoutcash ~ gender + occupation,
+                    data = OccupationfilterR6)
+ summary(Bregression22)
+ 
+ ## regression 3: Education levels as independent variables, and "forms of welfare" as a dependent variable
+ 
+ Cregression32 <-lm(length_withoutcash ~ gender + occupation + AGE + edu_attainment,
+                   data = OccupationfilterR6)
+ 
+ summary(Cregression32)
+ ## regression 4: Urban/rural location as an independent variable, and "forms of welfare" as a dependent variable
+ Dregression42 <- lm(length_withoutcash ~ gender + occupation + AGE + edu_attainment + URBRUR,
+                    data = OccupationfilterR6)
+ summary(Dregression42)
+ 
  
  
  
